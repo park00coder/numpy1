@@ -1,0 +1,166 @@
+import numpy as np
+
+# Provided temperature data
+temperature_data = [
+    ["Month", "Week", "Monday", "Max Temp", "Min Temp", "Max Temp", "Min Temp", "Max Temp", "Min Temp", "Max Temp", "Min Temp", "Max Temp", "Min Temp", "Max Temp", "Min Temp", "Max Temp"],
+    ["November", "Week 1", 7, 20, 6, 29, 11, 29, 10, 26, 12, 26, 10, 27, 12, 30],
+    ["November", "Week 2", 12, 28, 13, 28, 12, 27, -13, 29, 13, 21, 11, 31, 6, 22],
+    ["November", "Week 3", 8, 26, 12, 24, 11, 32, 6, 24, 6, 31, 11, 28, 12, 30],
+    ["November", "Week 4", 9, 32, 6, 31, 12, 28, 7, 20, 14, 22, 15, 24, 10, 32],
+    ["December", "Week 1", 13, 31, 10, 30, 14, 32, 8, 32, 13, 20, 14, 31, 10, 24],
+    ["December", "Week 2", 13, 22, 7, 28, 7, 25, 14, 28, 8, 27, 9, 28, 7, 28],
+    ["December", "Week 3", 13, 25, 14, 30, 12, 32, 6, 25, 12, 30, 13, 29, 12, 31],
+    ["December", "Week 4", 11, 32, 10, 30, 13, 30, 11, 28, 9, 27, 7, 23, 7, 20],
+    ["January", "Week 1", 6, 21, 4, 22, 4, 19, 5, 20, 8, 22, 3, 6, 21, 7],
+    ["January", "Week 2", 8, 18, 7, 19, 7, 20, 5, 22, 7, 18, 5, 4, 20, 8],
+    ["January", "Week 3", 4, 19, 2, 19, 7, 21, 7, 18, 7, 22, 2, 4, 20, 6],
+    ["January", "Week 4", 4, 18, 5, 21, 8, 18, 6, 18, 8, 22, 2, 4, 20, 7],
+    ["February", "Week 1", 7, 18, 10, 20, -10, 22, 11, 20, 7, 18, 7, 7, 18, 12],
+    ["February", "Week 2", 12, 22, 11, 22, 8, 18, 8, 18, 12, 19, 7, 8, 20, 8],
+    ["February", "Week 3", 9, 18, 7, 19, 11, 22, 11, 21, 11, 19, 7, 7, 21, 9],
+    ["February", "Week 4", 8, 22, 10, 21, 10, 19, 7, 20, 7, 20, 7, 10, 19, 10]
+]
+
+# Convert the data into a structured NumPy array
+dtype = [("Month", "U10"), ("Week", "U10"), ("Monday", int), ("Max_Tue", int), ("Min_Tue", int), ("Max_Wed", int), ("Min_Wed", int), ("Max_Thu", int), ("Min_Thu", int), ("Max_Fri", int), ("Min_Fri", int), ("Max_Sat", int), ("Min_Sat", int), ("Max_Sun", int), ("Min_Sun", int)]
+temperature_array = np.array(temperature_data[1:], dtype=dtype)
+
+# Task 2: Get dimensions and shape
+array_shape = temperature_array.shape
+
+# Task 3: Print daily temperatures for the first week of each month
+for month in np.unique(temperature_array["Month"]):
+    week1_temps = temperature_array[(temperature_array["Month"] == month) & (temperature_array["Week"] == "Week 1")]
+    print(f"Daily temperatures for the first week of {month}:")
+    print(week1_temps)
+
+# Task 4: Print temperatures for Tuesday of each month
+for month in np.unique(temperature_array["Month"]):
+    tuesday_temps = temperature_array[(temperature_array["Month"] == month) & (temperature_array["Week"] != "")]
+    tuesday_temps = tuesday_temps["Max_Tue"]
+    print(f"Temperatures for Tuesday of {month}:")
+    print(tuesday_temps)
+
+# Task 5: Print only the maximum temperature for all the weekdays of Dec and Feb.
+weekday_columns = ["Max_Tue", "Min_Tue", "Max_Wed", "Min_Wed", "Max_Thu", "Min_Thu", "Max_Fri", "Min_Fri"]
+dec_feb_weekdays_max_temp = temperature_array[(temperature_array["Month"] == "December") | (temperature_array["Month"] == "February")]
+print("Maximum temperatures for weekdays in December and February:")
+for weekday in weekday_columns:
+    print(temperature_array[weekday])
+
+# Task 6: Print all the days along with the week number in November when the minimum temperature was less than 8 degrees.
+nov_min_temp_below_8 = temperature_array[(temperature_array["Month"] == "November") & (temperature_array["Min_Tue"] < 8)]
+print("Days and week numbers in November with min temp below 8 degrees:")
+print(nov_min_temp_below_8[["Week", "Min_Tue"]])
+
+# Task 7: Print all the weeks in Dec and Jan where the maximum temperature has crossed a threshold of 20 degrees.
+dec_jan_above_20 = temperature_array[((temperature_array["Month"] == "December") | (temperature_array["Month"] == "January")) & (temperature_array["Max_Wed"] > 20)]
+print("Weeks in December and January with max temp above 20 degrees:")
+print(dec_jan_above_20[["Month", "Week"]])
+
+# Task 8: Check if there are any absurd values present in the dataset
+absurd_values = temperature_array[np.logical_or(temperature_array < -50, temperature_array > 50)]
+if len(absurd_values) > 0:
+    print("Absurd values found:")
+    print(absurd_values)
+
+# Task 9: Strategy to handle absurd values
+# Identify and replace absurd values with NaN
+absurd_values_indices = np.logical_or(temperature_array < -50, temperature_array > 50)
+temperature_array[absurd_values_indices] = np.nan
+
+
+# Task 10: Find and print the indexes of all the outlier (unusual) values present in the dataset.
+from scipy import stats
+
+# Calculate z-scores for each data point
+z_scores = stats.zscore(temperature_array[weekday_columns])
+
+# Define a threshold for considering a value as an outlier (e.g., z-score > 3)
+outlier_indices = np.argwhere(np.abs(z_scores) > 3)
+
+print("Indices of outlier values:")
+print(outlier_indices)
+
+
+# Task 11: Replace the outliers with an appropriate value.
+for index in outlier_indices:
+    row, col = index
+    column = weekday_columns[col]
+    temperature_array[row][column] = np.nanmedian(temperature_array[:, col])
+
+
+# Task 12: Find the average max temperature for the winter months in Jaipur.
+winter_months = ["December", "January", "February"]
+avg_max_temp_winter = np.mean(temperature_array[np.isin(temperature_array["Month"], winter_months)]["Max_Tue"])
+print("Average max temperature for winter months:", avg_max_temp_winter)
+
+# Task 13: Find the weekly min avg temp for the month of Dec in Jaipur.
+dec_weeks = temperature_array[(temperature_array["Month"] == "December") & (temperature_array["Week"] != "")]
+avg_min_temp_dec = np.mean(dec_weeks["Min_Tue"])
+print("Average weekly min temperature for December:", avg_min_temp_dec)
+
+# Task 14: Find the overall avg temp for the months Dec and Jan.
+dec_jan_temps = temperature_array[np.isin(temperature_array["Month"], ["December", "January"])]
+avg_temp_dec_jan = np.mean(np.hstack([dec_jan_temps[col] for col in weekday_columns]))
+print("Overall average temperature for December and January:", avg_temp_dec_jan)
+
+# Task 15: Find the least temp experienced by the city in the month of Dec and Jan.
+least_temp_dec_jan = np.min(np.hstack([dec_jan_temps[col] for col in weekday_columns]))
+print("Least temperature in December and January:", least_temp_dec_jan)
+
+# Task 16: Find the max temp in the month of Feb and return its date.
+max_temp_feb = np.max(temperature_array[temperature_array["Month"] == "February"]["Max_Tue"])
+date_max_temp_feb = temperature_array[(temperature_array["Month"] == "February") & (temperature_array["Max_Tue"] == max_temp_feb)]["Week"]
+print("Max temperature in February:", max_temp_feb)
+print("Date of max temperature in February:", date_max_temp_feb)
+
+# Task 17: Find the days in the month of Nov where the max temp of the day dropped below the avg temp of the month.
+nov_avg_max_temp = np.mean(temperature_array[(temperature_array["Month"] == "November") & (temperature_array["Week"] != "")]["Max_Tue"])
+nov_below_avg_days = temperature_array[(temperature_array["Month"] == "November") & (temperature_array["Max_Tue"] < nov_avg_max_temp)]
+print("Days in November with max temp below average:", nov_below_avg_days[["Week", "Max_Tue"]])
+
+# Task 18: Convert the dataset into an array with weeks of the same month in the same row.
+# This might require some reshaping and concatenation of rows based on months.
+
+# Task 19: Convert the temperature data to Fahrenheit.
+def celsius_to_fahrenheit(celsius):
+    return (celsius * 9/5) + 32
+
+temperature_array_fahrenheit = np.copy(temperature_array)
+for col in weekday_columns:
+    temperature_array_fahrenheit[col] = celsius_to_fahrenheit(temperature_array[col])
+
+# Task 20: Sort the data in descending order on the basis of weekly average for the month of Dec.
+sorted_dec_data = np.sort(dec_jan_temps, order="Max_Tue")[::-1]
+print("Sorted data in descending order for December:")
+print(sorted_dec_data)
+
+# Task 21: Sort the temp of the first three days of each month in descending order based on overall average for the whole winter.
+winter_months_data = temperature_array[np.isin(temperature_array["Month"], winter_months)]
+first_three_days = ["Monday", "Max_Tue", "Min_Tue"]
+sorted_first_three_days = np.sort(winter_months_data, order=first_three_days)[::-1]
+print("Sorted first three days of each month for the winter:")
+print(sorted_first_three_days)
+
+# Task 22: Create an array that stores the difference between the min and max temp for each day in all the winter months.
+temp_diff_winter = winter_months_data["Max_Tue"] - winter_months_data["Min_Tue"]
+print("Temperature difference between min and max for each day in winter:")
+print(temp_diff_winter)
+
+# Task 23: Find and store the difference between the max temp of two consecutive days for each month of winter season.
+temp_diff_consecutive_days = np.diff(winter_months_data["Max_Tue"])
+print("Temperature difference between consecutive max temp days:")
+print(temp_diff_consecutive_days)
+
+# Task 24: Find and store the difference between the minimum temp of two consecutive days for each month of the winter season.
+temp_diff_consecutive_days_min = np.diff(winter_months_data["Min_Tue"])
+print("Temperature difference between consecutive min temp days:")
+print(temp_diff_consecutive_days_min)
+
+# Task 25: Create an array by combining the data from tasks 23 and 24.
+combined_temp_diff = np.vstack((temp_diff_consecutive_days, temp_diff_consecutive_days_min)).T
+print("Combined temperature differences between consecutive days:")
+print(combined_temp_diff)
+
+
